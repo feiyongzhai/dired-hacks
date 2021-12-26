@@ -110,13 +110,21 @@ selection.  This allows you to gather files from multiple dired
 buffers for a single paste."
   (interactive "P")
   ;; TODO: add dired+ `dired-get-marked-files' support?
-  (let ((marked (dired-get-marked-files)))
+  (let* ((marked (dired-get-marked-files))
+	 (item (cons (list (current-buffer)) marked)))
     (if (or (not arg)
             (ring-empty-p dired-ranger-copy-ring))
         (progn
-          (ring-insert
-           dired-ranger-copy-ring
-           (cons (list (current-buffer)) marked))
+	  (when (ring-member dired-ranger-copy-ring item)
+	    ;; 只能说添加了一个保护机制，防止一些比较简单的重复的情况：
+            ;;
+	    ;; 在单个文件/mark的一堆文件上重复调用 copy 指令
+	    ;;
+	    ;; 但是不能完全保证 copy ring 中没有重复项，因为可能一开始
+	    ;; 是单独复制了一个文件，之后在 mark 的时候又把之前选过的
+	    ;; 文件又选了一遍
+	    (error "The item has been in copy ring!"))
+          (ring-insert dired-ranger-copy-ring item)
           ;; TODO: abstract the message/plural detection somewhere
           ;; (e.g. give it a verb and number to produce the correct
           ;; string.)
