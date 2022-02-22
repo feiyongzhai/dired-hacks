@@ -208,7 +208,7 @@ instead of copying them."
     (--each buffers
       (when (buffer-live-p it)
         (with-current-buffer it (revert-buffer))))
-    (unless arg (ring-remove dired-ranger-copy-ring 0))
+    (ring-remove dired-ranger-copy-ring 0)
     (message (format "Moved %d/%d item%s from copy ring."
                      copied-files
                      (length files)
